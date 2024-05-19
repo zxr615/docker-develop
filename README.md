@@ -1,4 +1,4 @@
-# 手摸手带你使用 docker-compose 编排一个开发环境（Nginx + Mysql + Redis + PHP-FPM）
+# 手摸手带你使用 docker-compose 编排一个开发环境（Nginx + Mysql + Redis + PHP-FPM + Laravel）
 
 ## 介绍
 
