@@ -167,13 +167,9 @@ networks:
     **nginx.conf 配置**
 
     来自 [Nginx](https://hub.docker.com/_/nginx) 描述，可搜索下面的关键字定位页面位置，我们得知 nginx.conf 文件存在于容器内的 `/etc/nginx/nginx.conf` 目录下，所以我们得把 `nginx.conf` 文件拿出来，放到本地修改使用。
+    > Build a new image with your configuration file  
+    > COPY nginx.conf /etc/nginx/nginx.conf
 
-    ````
-    ```
-    Build a new image with your configuration file
-    COPY nginx.conf /etc/nginx/nginx.conf
-    ```
-    ````
 
     **将容器的 `nginx.conf` 复制到宿主机上**
 
@@ -190,9 +186,9 @@ networks:
     除了使用 `docker-compose cp` 命令复制文件出来，我们还可以直接进入容器，找到文件把想要的文件复制出来。
     
     ```sh
-$ docker-compose ps
+    $ docker-compose ps
     NAME      IMAGE                  COMMAND                   ...
-nginx     docker-develop-nginx   "/docker-entrypoint.…"    ...
+    nginx     docker-develop-nginx   "/docker-entrypoint.…"    ...
     
     $ docker-compose exec nginx sh
     / #
@@ -204,15 +200,15 @@ nginx     docker-develop-nginx   "/docker-entrypoint.…"    ...
     *~/docker-develop/nginx/nginx.conf*
 
     ```nginx
-user  nginx;
-    ...
-http {
-        include       /etc/nginx/mime.types;
-       	... 
-        # gzip    on; # 默认是注释的
-        gzip      on; # 修改 nginx.conf 将 gzip 打开
-        include /etc/nginx/conf.d/*.conf;
-    }
+    user  nginx;
+        ...
+    http {
+            include       /etc/nginx/mime.types;
+            ... 
+            # gzip    on; # 默认是注释的
+            gzip      on; # 修改 nginx.conf 将 gzip 打开
+            include /etc/nginx/conf.d/*.conf;
+        }
     ```
     
     可以看到，还引入了一个配置文件夹，`*.conf` 通常是放各种站点的 server 配置，所以也是要替换容器默认的配置文件的。
@@ -220,7 +216,7 @@ http {
     我们先创建一个 `conf.d` 的文件夹，用来存放站点信息，先留空，后面讲到 PHP-FPM 的时候再往 `conf.d` 内写入站点文件。
 
     ```sh
-mkdir ~/docker-develop/nginx/conf.d
+    mkdir ~/docker-develop/nginx/conf.d
     ```
 
 6. 将 nginx 本地的 nginx.conf 覆盖到容器中去
@@ -261,8 +257,6 @@ mkdir ~/docker-develop/nginx/conf.d
     NAME                     IMAGE                  STATUS          ...
     docker-develop-nginx-1   docker-develop-nginx   Up 1 minutes    ...
     ```
-    
-    
 
 自此，Nginx 环境就已经搭建好了，是不是看着很复杂繁琐，我也觉得；但是麻烦一时，方便日后，想想日后要是再需要搭建新环境时，只需要安装一个 Docker，然后 `docker-compose up --build -d` 等待片刻，环境就好了，是不是也很方便呢。
 
@@ -309,30 +303,29 @@ mkdir ~/docker-develop/nginx/conf.d
 
     相比 nginx 的内容，这里多了一个 environment 的参数，为什么需要这个参数呢？这就得在  [MySQL](https://hub.docker.com/_/mysql) 找答案了，所以咱们还是得多看文档，下面引用的，复制原文在页面搜索相对应的介绍
 
-    ```
-    1. 这是简单启动的案例，这里指定了 -e 参数，也就是 environment
-    Starting a MySQL instance is simple: 
-    $ docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:tag
     
-    2. docker-compose.yml 案例 
-    Example docker-compose.yml for mysql:
-    environment:
-          MYSQL_ROOT_PASSWORD: example
+    > 1. 这是简单启动的案例，这里指定了 -e 参数，也就是 environment
+    > Starting a MySQL instance is simple: 
+    > $ docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:tag
+    > 
+    > 2. docker-compose.yml 案例 
+    > Example docker-compose.yml for mysql:
+    > environment:
+    >       MYSQL_ROOT_PASSWORD: example
+    > 
+    > 3. Environment Variables 环境变量的介绍
+    > This variable is mandatory and specifies the password that will be set for the MySQL root superuser account. In the above > example, it was set to my-secret-pw.
+    > 翻译：此变量是必需的，指定将为 MySQL root 超级用户帐户设置的密码。在上面的示例中，它被设置为 my-secret-pw 。
     
-    3. Environment Variables 环境变量的介绍
-    This variable is mandatory and specifies the password that will be set for the MySQL root superuser account. In the above example, it was set to my-secret-pw.
-    翻译：此变量是必需的，指定将为 MySQL root 超级用户帐户设置的密码。在上面的示例中，它被设置为 my-secret-pw 。
-    ```
 
 5. 配置文件
 
     根据 [文档](https://hub.docker.com/_/mysql) 的描述我们知道，mysql 的配置文件在容器里的 `/etc/mysql/my.cnf` 位置，所以，我们还是将 `my.cnf` 复制下来，修改后再替换虚拟机中的配置。
 
-    ```
-    Using a custom MySQL configuration file
-    
-    The default configuration for MySQL can be found in /etc/mysql/my.cnf, which may !includedir additional directories such as /etc/mysql/conf.d or /etc/mysql/mysql.conf.d. Please inspect the relevant files and directories within the mysql image itself for more details.
-    ```
+    > Using a custom MySQL configuration file
+    > 
+    > The default configuration for MySQL can be found in /etc/mysql/my.cnf, which may !includedir additional directories such as /etc/mysql/conf.d or /etc/mysql/mysql.conf.d. Please inspect the relevant files and directories within the mysql image itself for more details.
+
 
     复制配置文件 my.cnf
 
@@ -361,20 +354,14 @@ mkdir ~/docker-develop/nginx/conf.d
 
     上述都有复制宿主机的配置文件到容器，就是因为重启容器之后数据会丢失，到了 MySQL 这里重新构建后，数据也会丢失，所以要将数据给持久化(保存)到宿主机上。
 
-    
-
     新建一个文件夹 `data` 存持久化的数据 ，在 data 目录下再创建对应的文件夹做区分，因为接下来要安装的 Redis 也存在数据持久化的问题。
 
     `mkdir -p ~/docker-develop/data/mysql`
 
-    
-
     [MySQL](https://hub.docker.com/_/mysql) 文档 Where to Store Data 一节，我们知道数据是存在容器内的 /var/lib/mysql 文件夹中
 
-    ```
-    Where to Store Data
-    The -v /my/own/datadir:/var/lib/mysql part of the command mounts the /my/own/datadir directory from the underlying host system as /var/lib/mysql inside the container, where MySQL by default will write its data files.
-    ```
+    > Where to Store Data
+    > The -v /my/own/datadir:/var/lib/mysql part of the command mounts the /my/own/datadir directory from the underlying host system as /var/lib/mysql inside the container, where MySQL by default will write its data files.
 
     编辑 docker-compose.yml 
 
@@ -476,13 +463,11 @@ mkdir ~/docker-develop/nginx/conf.d
 
     相关文档说明：
 
-    ```
-    You can create your own Dockerfile that adds a redis.conf from the context into /data/, like so.
-    
-    FROM redis
-    COPY redis.conf /usr/local/etc/redis/redis.conf
-    CMD [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
-    ```
+    > You can create your own Dockerfile that adds a redis.conf from the context into /data/, like so.
+    > 
+    > FROM redis
+    > COPY redis.conf /usr/local/etc/redis/redis.conf
+    > CMD [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
 
     下载配置文件：
 
