@@ -1,0 +1,18 @@
+.DS_Store
+# 忽略 www 下的所有文件
+# 不忽略 www 文件夹
+www/*
+!www/
+
+# 不忽略 data 文件夹
+# 忽略 data 下的所有文件
+!/data/
+/data/*
+
+# 不忽略 mysql 和 redis 文件夹
+!/data/mysql/
+!/data/redis/
+
+# 忽略 mysql 和 redis 下的所有文件
+/data/mysql/*
+/data/redis/*

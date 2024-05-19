@@ -1,0 +1,57 @@
+services:
+  nginx:
+    build: ./nginx #构建nginx 目录下的 Dockerfile 
+    volumes:
+      - ./www:/www
+    labels: #为容器添加辅助说明信息
+      - nginx
+    ports: # 暴露端口信息
+      - 80:80 # 宿主机:容器
+      - 443:443
+      - 8080:80
+    restart: always # 容器退出后的重启策略为始终重启
+    networks: # 我们第一步填写的网络名称
+      - internal
+  mysql:
+      build: ./mysql
+      volumes:
+        - ./data/mysql:/var/lib/mysql
+      labels:
+        - mysql
+        - database
+      expose:
+        - 3306
+      ports:
+        - 3306:3306
+        - 3307:3306
+      environment:
+        MYSQL_ROOT_PASSWORD: GqLWQ2YU
+      networks:
+        - internal
+  redis:
+    build: ./redis
+    labels:
+      - redis
+    expose:
+      - 6379
+    volumes:
+      - ./data/redis:/data # 数据化持久目录，MySQL 一节细讲了，这里就不赘述了。
+    ports:
+      - 6379:6379
+    restart: always
+    networks:
+      - internal
+  php83:
+    build: ./php83
+    volumes:
+      - ./www:/www
+    labels:
+      - php
+      - php-fpm
+    expose:
+      - 9000
+    restart: always
+    networks:
+      - internal
+networks:
+  internal: # 这里的名字随便修改成什么都可以。
