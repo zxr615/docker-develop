@@ -41,6 +41,25 @@ services:
     restart: always
     networks:
       - internal
+  es:
+    build: ./es
+    volumes:
+      - ./data/es/data:/usr/share/elasticsearch/data
+      - ./data/es/plugins:/usr/share/elasticsearch/plugins
+      - ./logs/es:/usr/share/elasticsearch/logs
+      - ./es/config:/usr/share/elasticsearch/config
+    labels:
+      - es
+      - elasticsearch
+    expose:
+      - 9200
+      - 9300
+    ports:
+      - 9200:9200
+      - 9300:9300
+    restart: always
+    networks:
+        - internal
   php83:
     build: ./php83
     volumes:
